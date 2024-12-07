@@ -60,10 +60,11 @@ class AuthController {
   };
 }
 
+}
+
+
   async health (req, res) {
     res.status(200).json({ message: 'API working properly.' });
   };
-}
-
 
 export default new AuthController();
