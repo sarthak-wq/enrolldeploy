@@ -6,7 +6,7 @@ import cookieparser from "cookie-parser";
 
 const initialize = (app) => {
     app.use(cors({
-        origin: 'https://enrollfrontend-ps5m4h1ej-sarthaks-projects-bc1167b8.vercel.app',
+        origin: 'https://enrollfrontend-3vi4p1oyl-sarthaks-projects-bc1167b8.vercel.app',
         credentials: true,                 
         methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization']
