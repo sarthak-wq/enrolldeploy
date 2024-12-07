@@ -11,7 +11,7 @@ class AuthController {
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "None",
       });
 
       const decodedToken = jwt.decode(accessToken);
