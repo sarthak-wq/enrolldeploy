@@ -1,0 +1,358 @@
+openapi: 3.0.0
+info:
+  title: EnrollAI Student API
+  description: APIs for student operations, including profile management, course enrollment, and course history.
+  version: 1.0.0
+servers:
+  - url: http://localhost:9000
+    description: Local development environment
+
+paths:
+  /student:
+    post:
+      summary: Add Student
+      description: Add a new student with basic profile information, including id, role, and department.
+      operationId: addStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRequest'
+            example:
+              name: "John Doe"
+              email: "john.doe@university.edu"
+              role: "Student"
+              department: "Computer Science"
+              enrolledCourses: []
+      responses:
+        '201':
+          description: Student added successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: "123e4567-e89b-12d3-a456-426614174000"
+                  message:
+                    type: string
+                    example: "Student added successfully."
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                message: "Invalid request body."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 500
+                message: "Internal server error."
+
+  /student/{studentId}:
+    get:
+      summary: Get Student Profile
+      description: Retrieve a student's profile, including enrolled courses, department, and other details.
+      operationId: getStudentProfile
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Student profile retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentInfoResponse'
+        '404':
+          description: Student not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 404
+                message: "Student not found."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 500
+                message: "Internal server error."
+
+    post:
+      summary: Enroll in a Course
+      description: Enroll a student in a specific course offering.
+      operationId: enrollInCourse
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                courseOffer:
+                  $ref: '#/components/schemas/CourseOffer'
+              required:
+                - courseOffer
+            example:
+              courseOffer:
+                course:
+                  courseCode: "CS101"
+                  name: "Introduction to Computer Science"
+                  prerequisites: ["CS100"]
+                term:
+                  year: 2024
+                  semester: "FALL"
+                instructor: "Dr. Alice Smith"
+                maxSeats: 30
+                currentSeats: 25
+      responses:
+        '201':
+          description: Enrollment successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Student enrolled successfully."
+                  updatedProfile:
+                    $ref: '#/components/schemas/StudentInfoResponse'
+        '400':
+          description: Enrollment failed due to validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                message: "Enrollment failed due to validation error."
+        '404':
+          description: Course offering or student not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 404
+                message: "Course offering or student not found."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 500
+                message: "Internal server error."
+
+    put:
+      summary: Update Student Profile
+      description: Update profile information for a student, such as name and email.
+      operationId: updateStudentProfile
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Updated name of the student.
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  description: Updated email of the student.
+                  example: "john.doe@university.edu"
+      responses:
+        '200':
+          description: Student profile updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Profile updated successfully."
+        '400':
+          description: Update failed due to validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                message: "Update failed due to validation error."
+        '404':
+          description: Student not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 404
+                message: "Student not found."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 500
+                message: "Internal server error."
+
+components:
+  schemas:
+    StudentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@university.edu"
+        role:
+          type: string
+          enum: ["Student", "Faculty"]
+          example: "Student"
+        department:
+          type: string
+          example: "Computer Science"
+        enrolledCourses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseEnrollment'
+
+    StudentInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@university.edu"
+        role:
+          type: string
+          enum: ["Student", "Faculty"]
+          example: "Student"
+        department:
+          type: string
+          example: "Computer Science"
+        enrolledCourses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseEnrollment'
+
+    CourseEnrollment:
+      type: object
+      properties:
+        courseOffer:
+          $ref: '#/components/schemas/CourseOffer'
+        enrollmentStatus:
+          $ref: '#/components/schemas/EnrollmentStatus'
+
+    EnrollmentStatus:
+      type: string
+      enum: ["Enrolled", "Completed", "In Progress"]
+      example: "Enrolled"
+
+    CourseOffer:
+      type: object
+      properties:
+        course:
+          $ref: '#/components/schemas/Course'
+        term:
+          $ref: '#/components/schemas/Term'
+        instructor:
+          type: string
+          example: "Dr. Alice Smith"
+        maxSeats:
+          type: integer
+          example: 30
+        currentSeats:
+          type: integer
+          example: 25
+
+    Course:
+      type: object
+      properties:
+        courseCode:
+          type: string
+          example: "CS101"
+        name:
+          type: string
+          example: "Introduction to Computer Science"
+        prerequisites:
+          type: array
+          items:
+            type: string
+          example: ["CS100"]
+
+    Term:
+      type: object
+      properties:
+        year:
+          type: integer
+          example: 2024
+        semester:
+          type: string
+          enum: ["FALL", "SPRING", "SUMMER"]
+          example: "FALL"
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request body."

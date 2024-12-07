@@ -1,0 +1,297 @@
+openapi: 3.1.0
+info:
+  title: EnrollAI API
+  summary: REST API for managing user login, signup and course recommendations.
+  version: '1.0'
+servers:
+  - url: http://localhost:9000
+    description: Local development environment
+paths:
+  # User Login Endpoint - used to get JWT token
+  /auth/login:
+    post:
+      operationId: login
+      description: Logs in a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: University email address (username)
+                  examples: [deshmukh.sar@univerty.edu]
+                password:
+                  type: string
+                  description: User's password
+                  examples: [sarthak@123]
+      responses:
+        '200':
+          description: Successfully logged in, JWT token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token used for authentication in subsequent requests
+                    examples: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.Yyys4J7FwlHqZHgPyg9Z34wljwn5v_pAxlY8I85Fl4I]
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    examples: [INVALID_CREDENTIALS]
+                  message:
+                    type: string
+                    examples: [The email or password provided is incorrect.]
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    examples: [INTERNAL_SERVER_ERROR]
+                  message:
+                    type: string
+                    examples: [An unexpected error occurred on the server.] 
+
+# User Sign Up Endpoint - for new users to create an account
+  /auth/signup:
+    post:
+      operationId: signup
+      description: Registers a new user (student, faculty or admin) in the system and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: University email address
+                password:
+                  type: string
+                  description: User's password
+                firstName:
+                  type: string
+                  description: First name of the user
+                lastName:
+                  type: string
+                  description: Last name of the user
+                role:
+                  type: string
+                  description: Role of the user (Student, Faculty, Admin)
+                  enum:
+                    - Student
+                    - Faculty
+                    - Admin
+            example:
+              email: deshmukh.sar@northeastern.edu
+              password: sarthak@123
+              firstName: Sarthak
+              lastName: Deshmukh
+              role: student
+      responses:
+        '201':
+          description: Successfully signed up, JWT token returned with record creation status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Success code
+                    examples: [Success]
+                  message:
+                    type: string
+                    description: Success message
+                    examples: [Record created successfully.]
+                  token:
+                    type: string
+                    description: JWT token used for authentication in subsequent requests
+                    examples: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.Yyys4J7FwlHqZHgPyg9Z34wljwn5v_pAxlY8I85Fl4I]
+        '400':
+          description: Invalid input or user already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+              example:
+                code: USER_ALREADY_EXISTS
+                message: A user with this email already exists.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+              example:
+                code: INTERNAL_SERVER_ERROR
+                message: An unexpected error occurred on the server.
+
+# Chatbot API - for course recommendations
+  /chatbot/recommendations:
+    post:
+      operationId: get-course-recommendations
+      description: Provides course recommendations for a student based on their profile.
+      security:
+        - jwt: []  # JWT is required for this endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                  description: ID of the student requesting course recommendations
+                profileData:
+                  type: object
+                  description: Data about the student’s academic preferences, interests, and previous courses, current term
+                  additionalProperties: true
+            example:
+              studentId: 12345
+              profileData:
+                    major: "Computer Science"
+                    interests: ["AI", "Machine Learning"]
+                    previousCourses: ["CS101", "CS102"]
+                    currentTerm: "Fall 2024"
+      responses:
+        '200':
+          description: Successfully retrieved course recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseRecommendation'
+              example:
+                  - courseId: "CS103"
+                    courseName: "Data Structures"
+                    reason: "Foundational course in Computer Science for your major."
+                  - courseId: "CS104"
+                    courseName: "Algorithms"
+                    reason: "Advanced course recommended based on your interest in AI."
+
+        '400':
+          description: Invalid profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                    code: "INVALID_PROFILE_DATA"
+                    message: "The profile data provided is incomplete or invalid."
+        '401':
+          description: Unauthorized (JWT missing or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "UNAUTHORIZED"
+                message: "You must be logged in to access course recommendations."
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "INTERNAL_SERVER_ERROR"
+                message: "An unexpected error occurred on the server."
+
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: University email address (username)
+          examples: [deshmukh.sar@univerty.edu]
+        password:
+          type: string
+          description: User's password
+          examples: [sarthak@123]
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token used for authentication in subsequent requests
+          examples: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.Yyys4J7FwlHqZHgPyg9Z34wljwn5v_pAxlY8I85Fl4I]
+    SignupRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: University email address
+        password:
+          type: string
+          description: User's password
+        firstName:
+          type: string
+          description: First name of the user
+        lastName:
+          type: string
+          description: Last name of the user
+        role:
+          type: string
+          description: Role of the user (Student, Faculty, Admin)
+          enum:
+            - Student
+            - Faculty
+            - Admin
+    SignupResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token used for authentication in subsequent requests
+          examples: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.Yyys4J7FwlHqZHgPyg9Z34wljwn5v_pAxlY8I85Fl4I]
+    CourseRecommendation:
+      type: object
+      properties:
+        courseId:
+          type: string
+        courseName:
+          type: string
+        reason:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string

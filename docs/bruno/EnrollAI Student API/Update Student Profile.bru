@@ -1,0 +1,22 @@
+meta {
+  name: Update Student Profile
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:3002/student/:studentId
+  body: json
+  auth: none
+}
+
+params:path {
+  studentId: 673c148eb1620d59cca9fbc2
+}
+
+body:json {
+  {
+    "name": "Hello World I'm changing",
+    "email": "somethingnew@northwestern.edu"
+  }
+}
