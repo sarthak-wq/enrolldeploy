@@ -7,5 +7,6 @@ router.post('/login', authController.login);
 router.post('/signup', authController.signup);
 router.post('/',authController.logout);
 router.post('/check-auth', authenticateUser);
+router.post('/health',authController.health);
 
 export default router;
