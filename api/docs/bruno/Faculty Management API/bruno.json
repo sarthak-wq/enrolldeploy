@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Faculty Management API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

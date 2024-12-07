@@ -1,0 +1,22 @@
+meta {
+  name: get-course-recommendations
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/chatbot/recommendations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "studentId": "",
+    "profileData": {}
+  }
+}

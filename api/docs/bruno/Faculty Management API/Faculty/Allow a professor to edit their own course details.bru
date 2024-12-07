@@ -1,0 +1,27 @@
+meta {
+  name: Allow a professor to edit their own course details
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/faculty/:facultyId/courses/:courseOfferId/edit
+  body: json
+  auth: none
+}
+
+params:path {
+  facultyId: 
+  courseOfferId: 
+}
+
+body:json {
+  {
+    "instructor": "",
+    "maxSeats": "",
+    "currentSeats": "",
+    "courseName": "",
+    "courseDetails": "",
+    "term": {}
+  }
+}

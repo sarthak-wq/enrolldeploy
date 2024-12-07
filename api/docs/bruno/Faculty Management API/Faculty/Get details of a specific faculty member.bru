@@ -1,0 +1,15 @@
+meta {
+  name: Get details of a specific faculty member
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/faculty/:facultyId
+  body: none
+  auth: none
+}
+
+params:path {
+  facultyId: 
+}

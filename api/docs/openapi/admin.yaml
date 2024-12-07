@@ -1,0 +1,484 @@
+openapi: 3.0.3
+info:
+  title: EnrollAI - Admin API
+  description: API for administrative functions in EnrollAI, allowing admins to manage users, courses, departments, and programs.
+  version: 1.0.0
+servers:
+  - url: http://localhost:9000
+    description: Local development environment
+
+paths:
+  /admin/users:
+    get:
+      summary: Get all users
+      description: Retrieve a list of all users in the system.
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: A list of users retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+              example:
+                [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Alice Doe",
+                    "email": "alice.doe@example.com",
+                    "role": "Student",
+                  },
+                ]
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+    post:
+      summary: Add a new user
+      description: Create a new user with specified role and information.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+            example:
+              name: "John Doe"
+              email: "john.doe@example.com"
+              role: "Student"
+      responses:
+        "201":
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid input, object invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "Invalid input data for user creation."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+  /admin/users/{userId}:
+    get:
+      summary: Get user by ID
+      description: Retrieve details of a specific user.
+      operationId: getUserById
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            description: Unique identifier of the user.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: User details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "User with ID 123e4567-e89b-12d3-a456-426614174000 not found."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+    put:
+      summary: Update user information
+      description: Modify details of an existing user.
+      operationId: updateUser
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            description: Unique identifier of the user to update.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+            example:
+              name: "Jane Doe"
+              email: "jane.doe@example.com"
+              role: "Faculty"
+      responses:
+        "200":
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid input, object invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "Invalid input data for user update."
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "User with ID 123e4567-e89b-12d3-a456-426614174000 not found."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+    delete:
+      summary: Delete a user
+      description: Remove a user from the system.
+      operationId: deleteUser
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            description: Unique identifier of the user to delete.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "204":
+          description: User deleted successfully.
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "User with ID 123e4567-e89b-12d3-a456-426614174000 not found."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+  /courses:
+    get:
+      summary: Get all courses
+      description: Retrieve a list of all courses.
+      operationId: getAllCourses
+      responses:
+        "200":
+          description: A list of courses retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+              example:
+                [
+                  {
+                    "code": "CS101",
+                    "title": "Introduction to Computer Science",
+                    "description": "Basic concepts of computing.",
+                    "credits": 3,
+                  },
+                ]
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+    post:
+      summary: Add a new course
+      description: Create a new course.
+      operationId: createCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Course"
+            example:
+              code: "CS101"
+              title: "Introduction to Computer Science"
+              description: "This course introduces the fundamentals of computer science."
+              credits: 3
+      responses:
+        "201":
+          description: Course created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "400":
+          description: Invalid input, object invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "Invalid input data for course creation."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+  /courses/{courseOfferId}:
+    put:
+      summary: Update course information
+      description: Modify details of an existing course.
+      operationId: updateCourse
+      parameters:
+        - in: path
+          name: courseOfferId
+          required: true
+          schema:
+            type: string
+            description: Unique identifier of the course offering to update.
+          example: "2434"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseUpdate"
+            example:
+              courseOfferId: "2434"
+              course:
+                name: "NewCourse"
+                courseCode: "CS202"
+                prerequisites: ["CS101", "CS203"]
+                courseDescription: "Learn data structures like arrays, trees, and graphs."
+              term:
+                year: 2024
+                semester: "FALL"
+              faculty: "XYZ"
+              maxSeats: 50
+      responses:
+        "200":
+          description: Course updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseUpdate"
+        "400":
+          description: Invalid input, object invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "Invalid input data for course update."
+        "404":
+          description: Course not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "Course with ID 2434 not found."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+
+    delete:
+      summary: Delete a course
+      description: Remove a course offering from the system.
+      operationId: deleteCourse
+      parameters:
+        - in: path
+          name: courseOfferId
+          required: true
+          schema:
+            type: string
+            description: Unique identifier of the course offering to delete.
+          example: "2434"
+      responses:
+        "204":
+          description: Course deleted successfully.
+        "404":
+          description: Course not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "Course with ID 2434 not found."
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                message: "An unexpected error occurred."
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Full name of the user.
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+          example: "john.doe@example.com"
+        role:
+          type: string
+          description: Role of the user in the system.
+          enum: [Student, Faculty, Admin]
+          example: "Student"
+      required:
+        - name
+        - email
+        - role
+
+    Course:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Unique course code.
+          example: "CS101"
+        title:
+          type: string
+          description: Title of the course.
+          example: "Introduction to Computer Science"
+        description:
+          type: string
+          description: Detailed description of the course.
+          example: "This course introduces the fundamentals of computer science."
+        credits:
+          type: integer
+          format: int32
+          description: Number of credits assigned to the course.
+          example: 3
+    CourseUpdate:
+      type: object
+      properties:
+        courseOfferId:
+          type: string
+          description: Unique identifier for the course offering.
+          example: "2434"
+        course:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the course.
+              example: "NewCourse"
+            courseCode:
+              type: string
+              description: Unique course code.
+              example: "CS202"
+            prerequisites:
+              type: array
+              items:
+                type: string
+              description: List of prerequisite course codes.
+              example: ["CS101", "CS203"]
+            courseDescription:
+              type: string
+              description: Detailed description of the course.
+              example: "Learn data structures like arrays, trees, and graphs."
+        term:
+          type: object
+          properties:
+            year:
+              type: integer
+              format: int32
+              description: Academic year.
+              example: 2024
+            semester:
+              type: string
+              description: Academic semester.
+              enum: [FALL, SPRING, SUMMER]
+              example: "FALL"
+        faculty:
+          type: string
+          description: Faculty assigned to the course.
+          example: "XYZ"
+        maxSeats:
+          type: integer
+          format: int32
+          description: Maximum number of seats available for the course.
+          example: 50
+      required:
+        - code
+        - title
+        - credits
+        - courseOfferId
+        - course
+        - term
+        - faculty
+        - maxSeats
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Detailed error message.
+          example: "An unexpected error occurred."
