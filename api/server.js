@@ -7,6 +7,4 @@ const app = express();
 const port = process.env.PORT;
 initialize(app);
 
-app.listen(port, () => {
-    console.log(`Listening to port ${port}`)
-})
+app.listen(port, "0.0.0.0");
